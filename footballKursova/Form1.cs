@@ -1,12 +1,16 @@
-﻿using System;
+﻿using CsvHelper;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 
 namespace footballKursova
 {
@@ -561,6 +565,53 @@ namespace footballKursova
                 }
 
                 dataGridView.DataSource = table;
+            }
+        }
+
+        private void saveTable_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = tournamentsListBox.SelectedIndex;
+            if (selectedIndex >= 0 && selectedIndex < tournaments.Count)
+            {
+                Tournament selectedTournament = tournaments[selectedIndex];
+
+                // Створення потоку для запису у файл CSV
+                using (var writer = new StreamWriter("tournament_table.csv"))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture)) // Instantiate CsvWriter
+
+                {
+                    // Запис заголовків стовпців
+                    csv.WriteField("Команда");
+                    csv.WriteField("Матчі");
+                    csv.WriteField("Перемоги");
+                    csv.WriteField("Нічиї");
+                    csv.WriteField("Поразки");
+                    csv.WriteField("Забиті голи");
+                    csv.WriteField("Пропущені голи");
+                    csv.WriteField("Різниця голів");
+                    csv.WriteField("Очки");
+                    csv.NextRecord();
+
+                    // Запис даних рядків
+                    foreach (DataGridViewRow row in tournamentTableGridView.Rows)
+                    {
+                        if (!row.IsNewRow)
+                        {
+                            csv.WriteField(row.Cells["teamColumn"].Value);
+                            csv.WriteField(row.Cells["matchesPlayedColumn"].Value);
+                            csv.WriteField(row.Cells["winsColumn"].Value);
+                            csv.WriteField(row.Cells["drawsColumn"].Value);
+                            csv.WriteField(row.Cells["lossesColumn"].Value);
+                            csv.WriteField(row.Cells["goalsForColumn"].Value);
+                            csv.WriteField(row.Cells["goalsAgainstColumn"].Value);
+                            csv.WriteField(row.Cells["goalDifferenceColumn"].Value);
+                            csv.WriteField(row.Cells["pointsColumn"].Value);
+                            csv.NextRecord();
+                        }
+                    }
+                }
+
+                MessageBox.Show("Турнірна таблиця була збережена у файл CSV.");
             }
         }
     }
